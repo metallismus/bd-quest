@@ -1,0 +1,957 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CyberQuest: Бази Даних у Повсякденному Житті 🎮</title>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600;700&family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #0d1117;
+            --panel-bg: #161b22;
+            --panel-border: #30363d;
+            --text-main: #c9d1d9;
+            --text-muted: #8b949e;
+            --neon-green: #00ff66;
+            --neon-blue: #00e5ff;
+            --neon-purple: #b388ff;
+            --neon-red: #ff5252;
+            --font-code: 'Fira Code', monospace;
+            --font-sans: 'Inter', system-ui, sans-serif;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            font-family: var(--font-sans);
+            line-height: 1.6;
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(0, 229, 255, 0.05) 0%, transparent 25%),
+                radial-gradient(circle at 90% 80%, rgba(179, 136, 255, 0.05) 0%, transparent 25%);
+        }
+
+        header {
+            text-align: center;
+            padding: 20px 0;
+            border-bottom: 2px solid var(--panel-border);
+            margin-bottom: 30px;
+        }
+
+        h1 {
+            font-size: 2.2rem;
+            color: #fff;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 10px;
+            text-shadow: 0 0 10px var(--neon-green);
+        }
+
+        .subtitle {
+            color: var(--neon-blue);
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        .quest-banner {
+            background: rgba(22, 27, 34, 0.9);
+            border: 1px solid var(--neon-purple);
+            box-shadow: 0 0 15px rgba(179, 136, 255, 0.2);
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 30px;
+            position: relative;
+        }
+
+        .quest-banner::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; width: 4px; height: 100%;
+            background: var(--neon-purple);
+        }
+
+        .quest-banner h2 {
+            color: var(--neon-purple);
+            font-size: 1.4rem;
+            margin-bottom: 10px;
+        }
+
+        .progress-tracker {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 30px;
+            background: var(--panel-bg);
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid var(--panel-border);
+            gap: 10px;
+        }
+
+        .step-node {
+            flex: 1;
+            text-align: center;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            font-weight: 600;
+            padding: 8px;
+            border-radius: 6px;
+            background: #0d1117;
+            border: 1px solid transparent;
+        }
+
+        .step-node.active {
+            color: var(--neon-green);
+            border-color: var(--neon-green);
+            box-shadow: 0 0 10px rgba(0, 255, 102, 0.2);
+        }
+
+        .step-node.completed {
+            color: var(--neon-blue);
+            border-color: var(--neon-blue);
+        }
+
+        .stage-card {
+            background: var(--panel-bg);
+            border: 1px solid var(--panel-border);
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 30px;
+            display: none;
+            animation: fadeIn 0.4s ease-in-out;
+        }
+
+        .stage-card.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .stage-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--panel-border);
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+        }
+
+        .stage-title {
+            font-size: 1.4rem;
+            color: var(--neon-blue);
+        }
+
+        .theory-box {
+            background: #090d13;
+            border-left: 4px solid var(--neon-blue);
+            padding: 20px;
+            border-radius: 0 8px 8px 0;
+            margin-bottom: 25px;
+        }
+
+        .quiz-section {
+            background: rgba(255, 255, 255, 0.02);
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px dashed var(--panel-border);
+            margin-bottom: 25px;
+        }
+
+        .quiz-option {
+            display: block;
+            background: var(--panel-bg);
+            border: 1px solid var(--panel-border);
+            padding: 12px 18px;
+            border-radius: 6px;
+            margin: 10px 0;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .quiz-option:hover {
+            border-color: var(--neon-blue);
+            background: rgba(0, 229, 255, 0.05);
+        }
+
+        .simulator-container {
+            background: #05080c;
+            border: 1px solid var(--neon-green);
+            box-shadow: 0 0 15px rgba(0, 255, 102, 0.1);
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+
+        .sim-title {
+            color: var(--neon-green);
+            font-family: var(--font-code);
+            font-size: 1.1rem;
+            margin-bottom: 12px;
+        }
+
+        .task-instruction {
+            background: rgba(0, 229, 255, 0.1);
+            border: 1px solid var(--neon-blue);
+            color: #fff;
+            padding: 12px 15px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            font-size: 0.95rem;
+        }
+
+        .db-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-family: var(--font-code);
+            font-size: 0.85rem;
+            margin: 10px 0;
+        }
+
+        .db-table th, .db-table td {
+            border: 1px solid var(--panel-border);
+            padding: 8px 12px;
+            text-align: left;
+        }
+
+        .db-table th {
+            background: #1f242d;
+            color: var(--neon-blue);
+        }
+
+        .btn {
+            background: linear-gradient(135deg, var(--neon-green), #00cc52);
+            color: #000;
+            font-weight: 700;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn:hover {
+            box-shadow: 0 0 15px var(--neon-green);
+            transform: translateY(-2px);
+        }
+
+        .btn-reset {
+            background: transparent;
+            border: 1px solid var(--neon-red);
+            color: var(--neon-red);
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.85rem;
+        }
+
+        select, input {
+            background: #161b22;
+            border: 1px solid var(--panel-border);
+            color: #fff;
+            padding: 8px 12px;
+            border-radius: 4px;
+        }
+
+        .feedback {
+            margin-top: 15px;
+            padding: 12px;
+            border-radius: 6px;
+            display: none;
+            font-weight: 600;
+        }
+
+        .feedback.success {
+            background: rgba(0, 255, 102, 0.1);
+            border: 1px solid var(--neon-green);
+            color: var(--neon-green);
+            display: block;
+        }
+
+        .feedback.error {
+            background: rgba(255, 82, 82, 0.1);
+            border: 1px solid var(--neon-red);
+            color: var(--neon-red);
+            display: block;
+        }
+
+        #cert-screen {
+            text-align: center;
+            padding: 40px;
+            background: radial-gradient(circle, #1a2332 0%, #0d1117 100%);
+            border: 2px solid var(--neon-green);
+            border-radius: 12px;
+            box-shadow: 0 0 30px rgba(0, 255, 102, 0.2);
+            display: none;
+        }
+
+        #cert-screen.active {
+            display: block;
+        }
+
+        .teacher-form-box {
+            background: #161b22;
+            border: 1px solid var(--neon-blue);
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 25px;
+            text-align: left;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        canvas#confetti {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            pointer-events: none;
+            z-index: 999;
+        }
+    </style>
+</head>
+<body>
+
+    <canvas id="confetti"></canvas>
+
+    <header>
+        <h1>🚀 CyberQuest: БД у повсякденному житті</h1>
+        <div class="subtitle">Практична лайф-симуляція для 9 класу</div>
+    </header>
+
+    <div class="quest-banner">
+        <h2>🎪 Легенда Квесту: "Цифровий Менеджер"</h2>
+        <p>Ти — популярний підліток-блогер, геймер та співорганізатор фесту. Щодня ти опрацьовуєш сотні постів, збираєш сетап ПК, шукаєш ігри в Steam та розсилаєш квитки. Без знань баз даних твій цифровий світ перетвориться на суцільне «інформаційне сміття»!</p>
+    </div>
+
+    <div class="progress-tracker">
+        <div class="step-node active" id="node-1">1. TikTok / Insta Studio 📱</div>
+        <div class="step-node" id="node-2">2. Gaming PC Configurator 🖥️</div>
+        <div class="step-node" id="node-3">3. Steam Game Finder 🎮</div>
+        <div class="step-node" id="node-4">4. Fest VIP Pass Generator 🎟️</div>
+    </div>
+
+    <!-- ROOM 1 -->
+    <div class="stage-card active" id="stage-1">
+        <div class="stage-header">
+            <div class="stage-title">Кімната 1: Менеджмент контенту в соцмережах</div>
+            <button class="btn-reset" onclick="resetProgress()">🔄 Скинути прогрес</button>
+        </div>
+
+        <div class="theory-box">
+            <h3>📖 Теоретичний ключ: Об'єкти СКБД</h3>
+            <p>У базах даних (наприклад, LibreOffice Base):</p>
+            <ul>
+                <li><strong>Таблиця:</strong> Зберігає всю базу підписників та постів.</li>
+                <li><strong>Форма:</strong> Зручне вікно для швидкої публікації нового поста (щоб не редагувати всю таблицю вручну!).</li>
+            </ul>
+        </div>
+
+        <div class="quiz-section">
+            <p><strong>Завдання-Ключ:</strong> Який об'єкт БД слід відкрити, щоб зручно опублікувати новий пост у TikTok через графічні поля введення?</p>
+            <label class="quiz-option"><input type="radio" name="q1" value="table"> Таблиця</label>
+            <label class="quiz-option"><input type="radio" name="q1" value="form"> Форма</label>
+            <label class="quiz-option"><input type="radio" name="q1" value="query"> Запит</label>
+            <button class="btn" style="margin-top: 15px;" onclick="checkQ1()">Відкрити кімнату 🔑</button>
+            <div id="q1-feedback" class="feedback"></div>
+        </div>
+
+        <div id="sim-1" class="simulator-container" style="display: none;">
+            <div class="sim-title">📲 Симулятор Форми Публікації Поста</div>
+            <div class="task-instruction">📌 Заповніть Форму для додавання нового трендового відео:</div>
+
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:15px; max-width:600px; margin-bottom:15px;">
+                <div>
+                    <label style="font-size:0.85rem;">Назва треку/відео:</label>
+                    <input type="text" id="post-title" placeholder="TikTok Dance 2026" style="width:100%;">
+                </div>
+                <div>
+                    <label style="font-size:0.85rem;">Хештег:</label>
+                    <input type="text" id="post-tag" placeholder="#viral" style="width:100%;">
+                </div>
+                <div>
+                    <label style="font-size:0.85rem;">Прогнозовані перегляди:</label>
+                    <input type="number" id="post-views" placeholder="50000" style="width:100%;">
+                </div>
+            </div>
+
+            <button class="btn" onclick="savePostForm()">Зберегти запис у Формі 💾</button>
+            <div id="sim1-feedback" class="feedback"></div>
+        </div>
+    </div>
+
+    <!-- ROOM 2 -->
+    <div class="stage-card" id="stage-2">
+        <div class="stage-header">
+            <div class="stage-title">Кімната 2: Складання мрія-сетапу ігрового ПК</div>
+        </div>
+
+        <div class="theory-box">
+            <h3>📖 Теоретичний ключ: Поля, Типи даних та Первинний Ключ</h3>
+            <p>Кожен компонент ПК має свої параметри:</p>
+            <ul>
+                <li><strong>Поле:</strong> Назва властивості (Назва, Обсяг, Ціна).</li>
+                <li><strong>Типи даних:</strong> `Текст`, `Ціле число`, `Грошовий` (₴).</li>
+                <li><strong>Первинний Ключ (ID):</strong> Унікальний серійний номер, який ніколи не повторюється.</li>
+            </ul>
+        </div>
+
+        <div class="quiz-section">
+            <p><strong>Завдання-Ключ:</strong> Чому поле "Ціна" не можна робити Ключовим полем таблиці?</p>
+            <label class="quiz-option"><input type="radio" name="q2" value="repeat"> Різні комплектуючі можуть мати однакову ціну</label>
+            <label class="quiz-option"><input type="radio" name="q2" value="number"> Має забагато цифр</label>
+            <button class="btn" style="margin-top: 15px;" onclick="checkQ2()">Відкрити кімнату 🔑</button>
+            <div id="q2-feedback" class="feedback"></div>
+        </div>
+
+        <div id="sim-2" class="simulator-container" style="display: none;">
+            <div class="sim-title">🖥️ Симулятор Конфігуратора Реляційної Таблиці ПК</div>
+            <div class="task-instruction">📌 Задайте правильні типи даних для компонентів ПК та призначте Серійний номер як Первинний Ключ:</div>
+
+            <table class="db-table">
+                <thead>
+                    <tr>
+                        <th>Назва поля</th>
+                        <th>Обрати тип даних</th>
+                        <th>Первинний ключ?</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Серійний_Номер_ID</td>
+                        <td><select id="t1"><option value="int">Ціле число</option><option>Текст</option></select></td>
+                        <td><input type="radio" name="pk" value="id"> Ключ</td>
+                    </tr>
+                    <tr>
+                        <td>Деталь_ПК</td>
+                        <td><select id="t2"><option value="text">Текст</option><option>Грошовий</option></select></td>
+                        <td><input type="radio" name="pk" value="name"> Ключ</td>
+                    </tr>
+                    <tr>
+                        <td>Обсяг_Пам'яті_ГБ</td>
+                        <td><select id="t3"><option value="int">Ціле число</option><option>Грошовий</option></select></td>
+                        <td><input type="radio" name="pk" value="ram"> Ключ</td>
+                    </tr>
+                    <tr>
+                        <td>Ціна_ГРН</td>
+                        <td><select id="t4"><option value="money">Грошовий</option><option>Текст</option></select></td>
+                        <td><input type="radio" name="pk" value="price"> Ключ</td>
+                    </tr>
+                </tbody>
+            </table>
+            <button class="btn" onclick="validateSim2()">Зафіксувати базу деталей 💾</button>
+            <div id="sim2-feedback" class="feedback"></div>
+        </div>
+    </div>
+
+    <!-- ROOM 3 -->
+    <div class="stage-card" id="stage-3">
+        <div class="stage-header">
+            <div class="stage-title">Кімната 3: Пошук ігор у Steam для паті з друзями</div>
+        </div>
+
+        <div class="theory-box">
+            <h3>📖 Теоретичний ключ: Фільтри та Сортування</h3>
+            <p>У базі Steam понад 50,000 ігор. Для швидкого відбору використовують:</p>
+            <ul>
+                <li><strong>Сортування за спаданням:</strong> Покаже спочатку найпопулярніші ігри з найвищим рейтингом.</li>
+                <li><strong>Типовий Фільтр (Операція І):</strong> Відбере ігри, що задовольняють ДВІ умови одночасно (наприклад, Кооператив <strong>І</strong> Бюджет).</li>
+            </ul>
+        </div>
+
+        <div class="quiz-section">
+            <p><strong>Завдання-Ключ:</strong> Ви хочете знайти гри в Steam, які є Кооперативними <u>І</u> коштують менше 400 грн. Який фільтр застосувати?</p>
+            <label class="quiz-option"><input type="radio" name="q3" value="std"> Типовий (Стандартний) Фільтр з умовами І</label>
+            <label class="quiz-option"><input type="radio" name="q3" value="sort"> Просте сортування</label>
+            <button class="btn" style="margin-top: 15px;" onclick="checkQ3()">Відкрити кімнату 🔑</button>
+            <div id="q3-feedback" class="feedback"></div>
+        </div>
+
+        <div id="sim-3" class="simulator-container" style="display: none;">
+            <div class="sim-title">🎮 База даних Steam: Фільтрація ігор для вечора</div>
+            <div class="task-instruction">📌 <strong>Завдання:</strong> Знайдіть ігри з ціною <strong>`<= 400` грн</strong> для спільної гри:</div>
+
+            <div style="margin-bottom:15px; display:flex; gap:10px;">
+                <button class="btn" style="padding:6px 12px; font-size:0.85rem;" onclick="sortGames()">Сортувати за Рейтингом ⬇️</button>
+                <button class="btn" style="padding:6px 12px; font-size:0.85rem; background:var(--neon-blue);" onclick="openGameFilter()">Типовий Фільтр 🔍</button>
+            </div>
+
+            <div id="game-filter-panel" style="display:none; background:#161b22; padding:15px; border-radius:6px; margin-bottom:15px; border:1px solid var(--neon-blue);">
+                <div style="color:var(--neon-blue); font-weight:bold; margin-bottom:8px;">Налаштування Фільтра:</div>
+                <span>Ціна_грн</span>
+                <select id="g-op"><option value="<="><=</option></select>
+                <input type="number" id="g-val" value="400" style="width:80px;">
+                <button class="btn" style="padding:4px 10px;" onclick="applyGameFilter()">Застосувати Фільтр</button>
+            </div>
+
+            <table class="db-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Назва гри</th>
+                        <th>Жанр</th>
+                        <th>Ціна (грн)</th>
+                        <th>Рейтинг ⭐</th>
+                    </tr>
+                </thead>
+                <tbody id="steam-tbody"></tbody>
+            </table>
+            <div id="sim3-feedback" class="feedback"></div>
+            <div id="next-3-btn" style="display:none; margin-top:15px; text-align:right;">
+                <button class="btn" onclick="advanceStage()">Перейти до Кімнати 4 ➔</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ROOM 4 -->
+    <div class="stage-card" id="stage-4">
+        <div class="stage-header">
+            <div class="stage-title">Кімната 4: Генерування VIP-Квитків на Муз-Фест</div>
+        </div>
+
+        <div class="theory-box">
+            <h3>📖 Теоретичний ключ: Конструктор Запитів</h3>
+            <p><strong>Запит</strong> — це автоматизований пошук потрібної вибірки даних. У Конструкторі вказують:</p>
+            <ul>
+                <li><strong>Видиме:</strong> Поля, які мають бути надруковані у підсумковій таблиці.</li>
+                <li><strong>Критерій:</strong> Точна умова відбору (наприклад, Зона = 'VIP').</li>
+            </ul>
+        </div>
+
+        <div class="quiz-section">
+            <p><strong>Завдання-Ключ:</strong> Організатор хоче надрукувати список гостей з VIP-зони, які вже оплатили квиток. Як задати цю подвійну умову в Конструкторі?</p>
+            <label class="quiz-option"><input type="radio" name="q4" value="same"> Записати обидві умови в один рядок «Критерій»</label>
+            <label class="quiz-option"><input type="radio" name="q4" value="diff"> Записати умови у різні рядки «Або»</label>
+            <button class="btn" style="margin-top: 15px;" onclick="checkQ4()">Відкрити кімнату 🔑</button>
+            <div id="q4-feedback" class="feedback"></div>
+        </div>
+
+        <div id="sim-4" class="simulator-container" style="display: none;">
+            <div class="sim-title">🎟️ Симулятор Конструктора Запитів Квиткової Системи</div>
+            <div class="task-instruction">📌 Сформуйте запит: оберіть Зону = <strong>'VIP'</strong> ТА Статус = <strong>'Оплачено'</strong>:</div>
+
+            <table class="db-table">
+                <thead>
+                    <tr>
+                        <th>Параметри Конструктора</th>
+                        <th>Поле 1: Зона Квитка</th>
+                        <th>Поле 2: Статус Оплати</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Критерій (Умова)</strong></td>
+                        <td>
+                            <select id="q-zone">
+                                <option value="all">-- Всі зони --</option>
+                                <option value="vip">дорівнює 'VIP'</option>
+                                <option value="fan">дорівнює 'Fan-zone'</option>
+                            </select>
+                        </td>
+                        <td>
+                            <select id="q-status">
+                                <option value="all">-- Всі статуси --</option>
+                                <option value="paid">дорівнює 'Оплачено'</option>
+                                <option value="wait">дорівнює 'Очікує'</option>
+                            </select>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <button class="btn" style="margin-top:15px;" onclick="runFestQuery()">Сформувати вибірку квитків ▶️</button>
+            
+            <div id="fest-result" style="margin-top:15px; display:none;">
+                <div style="color:var(--neon-green); font-weight:bold; margin-bottom:5px;">Результат виконання запиту (VIP-список):</div>
+                <table class="db-table">
+                    <thead>
+                        <tr>
+                            <th>Код квитка</th>
+                            <th>Прізвище гостя</th>
+                            <th>Зона</th>
+                            <th>Статус</th>
+                        </tr>
+                    </thead>
+                    <tbody id="fest-tbody"></tbody>
+                </table>
+            </div>
+            <div id="sim4-feedback" class="feedback"></div>
+        </div>
+    </div>
+
+    <!-- CERTIFICATE & FORMSPREE SCREEN -->
+    <div id="cert-screen">
+        <div style="border:2px dashed var(--neon-blue); padding:30px; border-radius:8px;">
+            <h1 style="color:var(--neon-green);">🎓 СЕРТИФІКАТ ЦИФРОВОГО МЕНЕДЖЕРА</h1>
+            <p style="font-size: 1.2rem; margin: 15px 0;">Вітаємо! Учень/Учениця 9 класу пройшов(ла) практичну симуляцію та довів(ла) уміння користуватися Базами Даних у реальному житті!</p>
+            <div style="font-family:var(--font-code); color:var(--neon-blue); font-size:1.1rem; margin-bottom:20px;">
+                Контент налаштовано • Сетап зібрано • Steam-паті організовано!
+            </div>
+
+            <!-- FORMSPREE FORM -->
+            <div class="teacher-form-box">
+                <h3 style="color:var(--neon-green); margin-bottom:12px; font-size:1.1rem; text-align:center;">📩 Надіслати результат викладачу</h3>
+                
+                <form id="teacher-form" action="https://formspree.io/f/maeqazql" method="POST">
+                    <div style="margin-bottom:12px;">
+                        <label style="font-size:0.85rem; display:block; margin-bottom:4px;">Прізвище та Ім'я учня:</label>
+                        <input type="text" name="student_name" required placeholder="Іваненко Петро" style="width:100%;">
+                    </div>
+                    <div style="margin-bottom:12px;">
+                        <label style="font-size:0.85rem; display:block; margin-bottom:4px;">Клас:</label>
+                        <input type="text" name="student_class" required placeholder="9-А" style="width:100%;">
+                    </div>
+                    
+                    <!-- Hidden Metadata -->
+                    <input type="hidden" name="quest_title" value="Квест з Баз Даних (9 клас)">
+                    <input type="hidden" name="status" value="Успішно пройдено всі 4 кімнати!">
+                    <input type="hidden" id="completion-time" name="completed_at" value="">
+
+                    <button type="submit" class="btn" id="submit-btn" style="width:100%; justify-content:center;">Надіслати результат 📩</button>
+                </form>
+                <div id="form-status" class="feedback"></div>
+            </div>
+
+            <div style="margin-top:25px;">
+                <button class="btn-reset" onclick="resetProgress()">Пройти квест знову 🔄</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        function playSound(type) {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+
+            if (type === 'success') {
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(587.33, audioCtx.currentTime);
+                osc.frequency.setValueAtTime(880, audioCtx.currentTime + 0.1);
+                gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.3);
+            } else if (type === 'error') {
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(220, audioCtx.currentTime);
+                osc.frequency.setValueAtTime(110, audioCtx.currentTime + 0.15);
+                gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.3);
+            }
+        }
+
+        let currentStage = 1;
+
+        const steamGames = [
+            { id: 101, title: "Cyberpunk 2077", genre: "RPG / Solo", price: 900, rating: 4.8 },
+            { id: 102, title: "Terraria", genre: "Co-op / Sandbox", price: 250, rating: 4.9 },
+            { id: 103, title: "Lethal Company", genre: "Co-op / Horror", price: 300, rating: 4.7 },
+            { id: 104, title: "CS:GO Skins Case", genre: "Shooter", price: 1500, rating: 4.2 },
+            { id: 105, title: "Among Us", genre: "Co-op / Party", price: 120, rating: 4.5 }
+        ];
+        let currentGames = [...steamGames];
+
+        const festTickets = [
+            { id: "TK-001", name: "Коваленко Олексій", zone: "VIP", status: "Оплачено" },
+            { id: "TK-002", name: "Петренко Марія", zone: "Fan-zone", status: "Оплачено" },
+            { id: "TK-003", name: "Мельник Ігор", zone: "VIP", status: "Очікує" },
+            { id: "TK-004", name: "Сидоренко Анна", zone: "VIP", status: "Оплачено" }
+        ];
+
+        window.onload = () => {
+            const savedStage = localStorage.getItem('life_db_stage');
+            if (savedStage) currentStage = parseInt(savedStage);
+            updateStageDisplay();
+            renderSteamTable();
+        };
+
+        function updateStageDisplay() {
+            for (let i = 1; i <= 4; i++) {
+                const node = document.getElementById(`node-${i}`);
+                const stageCard = document.getElementById(`stage-${i}`);
+                if (i < currentStage) {
+                    node.className = "step-node completed";
+                    stageCard.classList.remove('active');
+                } else if (i === currentStage) {
+                    node.className = "step-node active";
+                    stageCard.classList.add('active');
+                } else {
+                    node.className = "step-node";
+                    stageCard.classList.remove('active');
+                }
+            }
+            if (currentStage > 4) {
+                document.querySelectorAll('.stage-card').forEach(el => el.classList.remove('active'));
+                document.getElementById('cert-screen').classList.add('active');
+                document.getElementById('completion-time').value = new Date().toLocaleString('uk-UA');
+                triggerConfetti();
+            }
+        }
+
+        function advanceStage() {
+            currentStage++;
+            localStorage.setItem('life_db_stage', currentStage);
+            updateStageDisplay();
+        }
+
+        function resetProgress() {
+            localStorage.removeItem('life_db_stage');
+            currentStage = 1;
+            location.reload();
+        }
+
+        // ROOM 1
+        function checkQ1() {
+            const val = document.querySelector('input[name="q1"]:checked')?.value;
+            const fb = document.getElementById('q1-feedback');
+            if (val === 'form') {
+                fb.className = "feedback success";
+                fb.innerText = "Правильно! Форма забезпечує графічне введення даних. Симулятор відкрито!";
+                playSound('success');
+                document.getElementById('sim-1').style.display = 'block';
+            } else {
+                fb.className = "feedback error";
+                fb.innerText = "Невірно. Таблиці або запити складніші для звичайного швидкого введення.";
+                playSound('error');
+            }
+        }
+
+        function savePostForm() {
+            const title = document.getElementById('post-title').value;
+            const tag = document.getElementById('post-tag').value;
+            const fb = document.getElementById('sim1-feedback');
+
+            if (title && tag) {
+                fb.className = "feedback success";
+                fb.innerHTML = `Запис успішно додано у БД! Пост "${title}" збережено. Кімнату 1 пройдено! <button class='btn' style='margin-left:10px; padding:4px 8px;' onclick='advanceStage()'>Далі ➔</button>`;
+                playSound('success');
+            } else {
+                fb.className = "feedback error";
+                fb.innerText = "Заповніть усі поля формы перед збереженням!";
+                playSound('error');
+            }
+        }
+
+        // ROOM 2
+        function checkQ2() {
+            const val = document.querySelector('input[name="q2"]:checked')?.value;
+            const fb = document.getElementById('q2-feedback');
+            if (val === 'repeat') {
+                fb.className = "feedback success";
+                fb.innerText = "Вірно! Ключове поле повинно мати ЛИШЕ унікальні значення.";
+                playSound('success');
+                document.getElementById('sim-2').style.display = 'block';
+            } else {
+                fb.className = "feedback error";
+                fb.innerText = "Помилка. Подумайте про те, чи можуть дві деталі коштувати однаково.";
+                playSound('error');
+            }
+        }
+
+        function validateSim2() {
+            const t1 = document.getElementById('t1').value;
+            const t2 = document.getElementById('t2').value;
+            const t3 = document.getElementById('t3').value;
+            const t4 = document.getElementById('t4').value;
+            const pk = document.querySelector('input[name="pk"]:checked')?.value;
+            const fb = document.getElementById('sim2-feedback');
+
+            if (t1 === 'int' && t2 === 'text' && t3 === 'int' && t4 === 'money' && pk === 'id') {
+                fb.className = "feedback success";
+                fb.innerHTML = "Супер! Конфігурацію таблиці визначено вірно. Кімнату 2 пройдено! <button class='btn' style='margin-left:10px; padding:4px 8px;' onclick='advanceStage()'>Далі ➔</button>";
+                playSound('success');
+            } else {
+                fb.className = "feedback error";
+                fb.innerText = "Перевірте: Ціна має бути Грошовим типом, а Серійний номер — Ключем!";
+                playSound('error');
+            }
+        }
+
+        // ROOM 3
+        function checkQ3() {
+            const val = document.querySelector('input[name="q3"]:checked')?.value;
+            const fb = document.getElementById('q3-feedback');
+            if (val === 'std') {
+                fb.className = "feedback success";
+                fb.innerText = "Абсолютно вірно! Для подвійної умови використовують Типовий Фільтр.";
+                playSound('success');
+                document.getElementById('sim-3').style.display = 'block';
+            } else {
+                fb.className = "feedback error";
+                fb.innerText = "Невірно. Сортування лише переставляє рядки місцями.";
+                playSound('error');
+            }
+        }
+
+        function renderSteamTable() {
+            const tbody = document.getElementById('steam-tbody');
+            tbody.innerHTML = '';
+            currentGames.forEach(g => {
+                tbody.innerHTML += `<tr>
+                    <td>${g.id}</td>
+                    <td><strong>${g.title}</strong></td>
+                    <td>${g.genre}</td>
+                    <td>${g.price} грн</td>
+                    <td>${g.rating} ⭐</td>
+                </tr>`;
+            });
+        }
+
+        function sortGames() {
+            currentGames.sort((a, b) => b.rating - a.rating);
+            renderSteamTable();
+            playSound('success');
+        }
+
+        function openGameFilter() {
+            document.getElementById('game-filter-panel').style.display = 'block';
+        }
+
+        function applyGameFilter() {
+            const val = parseInt(document.getElementById('g-val').value);
+            currentGames = steamGames.filter(g => g.price <= val);
+            renderSteamTable();
+
+            const fb = document.getElementById('sim3-feedback');
+            fb.className = "feedback success";
+            fb.innerText = "Фільтр застосовано! Відібрано доступні ігри для вечора!";
+            document.getElementById('next-3-btn').style.display = 'block';
+            playSound('success');
+        }
+
+        // ROOM 4
+        function checkQ4() {
+            const val = document.querySelector('input[name="q4"]:checked')?.value;
+            const fb = document.getElementById('q4-feedback');
+            if (val === 'same') {
+                fb.className = "feedback success";
+                fb.innerText = "Вірно! Умови в одному рядку «Критерій» працюють як логічне І.";
+                playSound('success');
+                document.getElementById('sim-4').style.display = 'block';
+            } else {
+                fb.className = "feedback error";
+                fb.innerText = "Невірно. Умови в різних рядках працюють як логічне АБО.";
+                playSound('error');
+            }
+        }
+
+        function runFestQuery() {
+            const zone = document.getElementById('q-zone').value;
+            const status = document.getElementById('q-status').value;
+            const fb = document.getElementById('sim4-feedback');
+            const tbody = document.getElementById('fest-tbody');
+            const resDiv = document.getElementById('fest-result');
+
+            if (zone === 'vip' && status === 'paid') {
+                const res = festTickets.filter(t => t.zone === 'VIP' && t.status === 'Оплачено');
+                tbody.innerHTML = '';
+                res.forEach(t => {
+                    tbody.innerHTML += `<tr>
+                        <td>${t.id}</td>
+                        <td>${t.name}</td>
+                        <td>${t.zone}</td>
+                        <td>${t.status}</td>
+                    </tr>`;
+                });
+                resDiv.style.display = 'block';
+                fb.className = "feedback success";
+                fb.innerHTML = "Запит успішно виконано! VIP-список сформовано. <button class='btn' style='margin-left:10px; padding:4px 8px;' onclick='advanceStage()'>Отримати сертифікат 🎓</button>";
+                playSound('success');
+            } else {
+                resDiv.style.display = 'none';
+                fb.className = "feedback error";
+                fb.innerText = "Обрано неправильні критерії. Установите: Зона = 'дорівнює VIP' ТА Статус = 'дорівнює Оплачено'.";
+                playSound('error');
+            }
+        }
+
+        // Formspree AJAX Submission
+        document.getElementById('teacher-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const form = this;
+            const statusDiv = document.getElementById('form-status');
+            const submitBtn = document.getElementById('submit-btn');
+
+            submitBtn.disabled = true;
+            submitBtn.innerText = "Надсилання...";
+
+            fetch(form.action, {
+                method: form.method,
+                body: new FormData(form),
+                headers: {
+                    'Accept': 'application/json'
+                }
+            }).then(response => {
+                if (response.ok) {
+                    statusDiv.className = "feedback success";
+                    statusDiv.innerText = "✅ Результат успішно надіслано на пошту викладача!";
+                    form.reset();
+                    playSound('success');
+                } else {
+                    statusDiv.className = "feedback error";
+                    statusDiv.innerText = "❌ Помилка надсилання. Спробуйте ще раз.";
+                    playSound('error');
+                }
+                submitBtn.disabled = false;
+                submitBtn.innerText = "Надіслати результат 📩";
+            }).catch(error => {
+                statusDiv.className = "feedback error";
+                statusDiv.innerText = "❌ Мережева помилка. Перевірте з'єднання.";
+                submitBtn.disabled = false;
+                submitBtn.innerText = "Надіслати результат 📩";
+                playSound('error');
+            });
+        });
+
+        function triggerConfetti() {
+            const canvas = document.getElementById('confetti');
+            const ctx = canvas.getContext('2d');
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            const particles = [];
+            const colors = ['#00ff66', '#00e5ff', '#b388ff', '#ffffff'];
+
+            for (let i = 0; i < 100; i++) {
+                particles.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height - canvas.height,
+                    color: colors[Math.floor(Math.random() * colors.length)],
+                    size: Math.random() * 8 + 4,
+                    speed: Math.random() * 3 + 2
+                });
+            }
+
+            function animate() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                particles.forEach(p => {
+                    p.y += p.speed;
+                    if (p.y > canvas.height) p.y = -10;
+                    ctx.fillStyle = p.color;
+                    ctx.fillRect(p.x, p.y, p.size, p.size);
+                });
+                requestAnimationFrame(animate);
+            }
+            animate();
+        }
+    </script>
+</body>
+</html>
